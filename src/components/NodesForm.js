@@ -18,10 +18,32 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
   const [portsStatus, setPortsStatus] = useState('');
   const [portsComment, setPortsComment] = useState('');
 
+  //dropdown menu
+  const [osOptions, setOsOptions] = useState([]);
+  const [circleOptions, setCircleOptions] = useState([]);
+  const [operatorOptions, setOperatorOptions] = useState([]);
+
   const client = axios.create({
     baseURL: "http://127.0.0.1:8000",
     withCredentials: true,
   });
+
+  // Fetch dropdown options from backend on component mount
+  useEffect(() => {
+    fetchDropdownOptions();
+  }, []);
+
+  const fetchDropdownOptions = async () => {
+    try {
+      const response = await axios.get('/api/get_dropdown_options/');
+      setOsOptions(response.data.os_options);
+      setCircleOptions(response.data.circle_options);
+      setOperatorOptions(response.data.operator_options);
+    } catch (error) {
+      console.error('Error fetching dropdown options:', error);
+    }
+  };
+
 
   // const handleSubmitNodes = (event) => {
   //   event.preventDefault();
@@ -241,6 +263,17 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
                 </Navbar.Collapse>
               </Container>
             </Navbar>
+
+            {/* <nav className="h-16 bg-sky-600 flex items-center">
+              <div className="w-10/12 m-auto flex justify-between">
+                <img src="logo1.png" alt="Logo" className="h-8 w-20" />
+                <button type="button" className="px-3 rounded-full text-white hover:bg-sky-900 shadow-inner shadow-white">Log out</button>
+              </div>
+            </nav> */}
+
+
+
+
             <div className="centre">
               <form className='centre row-g-3' onSubmit={handleSubmitNodes}>
                 <div className="form-group col-md-6">
@@ -262,9 +295,12 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
                 <div class="form-group col-md-6">
                   <label htmlFor="OS">OS:</label>
                   <select class="form-control" id="OS" name="OS" required >
-                    <option selected>Open this select menu</option>
-                    <option value="Test1">Test1</option>
-                    <option value="Test2">Test2</option>
+                    <option value="" selected>Choose OS</option>
+                    {osOptions.map((option, index) => (
+                      <option key={index} value={option}>{option}</option>
+                    ))}
+                    {/* <option value="Test1">Test1</option>
+                    <option value="Test2">Test2</option> */}
 
                   </select>
                 </div>
@@ -291,13 +327,16 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
 
                   <select class="form-control" id="Operator" name="Operator" required >
 
-                    <option selected>Open this select menu</option>
-                    <option value="Precall">Precall</option>
+                    <option value="" selected>Choose Operator</option>
+                    {operatorOptions.map((option, index) => (
+                      <option key={index} value={option}>{option}</option>
+                    ))}
+                    {/* <option value="Precall">Precall</option>
                     <option value="International">International</option>
                     <option value="Enterprise/DWH">Enterprise/DWH</option>
                     <option value="Vodafone">Vodafone</option>
                     <option value="Idea/WAP">Idea/WAP</option>
-                    <option value="Airtel">Airtel</option>
+                    <option value="Airtel">Airtel</option> */}
                   </select>
                 </div>
 
@@ -309,9 +348,13 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
                 <div class="form-group col-md-6">
                   <label htmlFor="Circle">Circle:</label>
                   <select class="form-control" id="Circle" name="Circle" required >
-                    <option selected>Open this select menu</option>
-                    <option value="Test1">Test1</option>
-                    <option value="Test2">Test2</option>
+                    <option value="" selected>Choose Circle</option>
+
+                    {circleOptions.map((option, index) => (
+                      <option key={index} value={option}>{option}</option>
+                    ))}
+                    {/* <option value="Test1">Test1</option>
+                    <option value="Test2">Test2</option> */}
 
                   </select>
                 </div>
@@ -334,6 +377,8 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
                   <label htmlFor="Time_Sync">Time Sync:</label>
                   <input type="number" className="form-control" id="Time_Sync" name="Time_Sync" required />
                 </div> */}
+
+
                 <br></br>
                 <div>
                   PORTS DETAILS
@@ -432,7 +477,7 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
 
               </form>
             </div>
-          </>
+          </ >
         )
       }
     </>
