@@ -8,6 +8,8 @@ import axios from 'axios';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import App from '../App.js'
 import NodesForm from '../components/NodesForm.js';
+import '../'
+
 
 const client = axios.create({
   baseURL: "http://127.0.0.1:8000"

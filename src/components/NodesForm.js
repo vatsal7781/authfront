@@ -18,6 +18,10 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
   const [portsStatus, setPortsStatus] = useState('');
   const [portsComment, setPortsComment] = useState('');
 
+
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
   //dropdown menu
   const [osOptions, setOsOptions] = useState([]);
   const [circleOptions, setCircleOptions] = useState([]);
@@ -157,20 +161,20 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
       const ip = formData.get('Ip');
       const username = formData.get('Username');
       const password = formData.get('Password');
-      const os = formData.get('OS');
-      const nodeType = formData.get('Node_type');
+      const OS = formData.get('OS');
+      const nodeType = formData.get('NodeType');
       // const fakeIp = formData.get('Fake_ip');
       const operator = formData.get('Operator');
       const hostName = formData.get('HostName');
       const circle = formData.get('Circle');
-      const timeSync = formData.get('Time_Sync');
+      const timeSync = formData.get('TimeSync');
 
       // Send data to create node
       const nodeResponse = await client.post('/api/nodesForm', {
         Ip: ip,
         Username: username,
         Password: password,
-        OS: os,
+        OS: OS,
         Node_type: nodeType,
         // Fake_ip: fakeIp,
         Operator: operator,
@@ -178,6 +182,18 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
         Circle: circle,
         Time_Sync: timeSync,
       });
+
+      const requiredFields = ['Ip', 'Username', 'OS', 'RemotePort', 'LocalPort', 'Direction', 'SocketPath', 'Status', 'Comment'];
+
+      const isValid = requiredFields.every(field => formData[field].trim() !== '');
+
+      if (!isValid) {
+        setErrorMessage('Please fill in all required fields.');
+        setSuccessMessage('');
+      } else {
+        setSuccessMessage('Form submitted successfully!');
+        setErrorMessage('');
+      }
 
       // Access the node ID from the response
       const nodeId = nodeResponse.data.node.Id;
@@ -249,235 +265,156 @@ const NodesForm = ({ currentUser, setCurrentUser }) => {
             <div>Form filled successfully!</div>
           </>
         ) : (
-          <>
-            <Navbar className='Nav'>
-              <Container>
-                <Navbar.Brand><img src='../media/logo.png' height='10px' width='10px' alt='Logo'></img></Navbar.Brand>
-                <Navbar.Toggle />
-                <Navbar.Collapse className="justify-content-end">
-                  <Navbar.Text>
-                    <form onSubmit={e => submitLogout(e)}>
-                      <Button type="submit" variant="light"><Link to="/">Log out</Link></Button>
-                    </form>
-                  </Navbar.Text>
-                </Navbar.Collapse>
-              </Container>
-            </Navbar>
-
-            {/* <nav className="h-16 bg-sky-600 flex items-center">
+          <div>
+            <nav className="h-16 bg-sky-600 flex items-center">
               <div className="w-10/12 m-auto flex justify-between">
                 <img src="logo1.png" alt="Logo" className="h-8 w-20" />
-                <button type="button" className="px-3 rounded-full text-white hover:bg-sky-900 shadow-inner shadow-white">Log out</button>
+                <form onSubmit={e => submitLogout(e)}>
+                  <button type="submit" className="px-3 rounded-full text-white hover:bg-sky-900 shadow-inner shadow-white"><Link to="/">Log out</Link></button>
+                </form>
               </div>
-            </nav> */}
+            </nav>
 
-
-
-
-            <div className="centre">
-              <form className='centre row-g-3' onSubmit={handleSubmitNodes}>
-                <div className="form-group col-md-6">
-                  <label htmlFor="Ip">IP:</label>
-                  <input type="text" className="form-control" id="Ip" name="Ip" required />
+            <form onSubmit={handleSubmitNodes}>
+              <main className="flex flex-col justify-center w-[28vw] m-auto">
+                <div className="form-group flex justify-between mt-4">
+                  <label htmlFor="Ip" className="w-60 border-2 flex justify-between items-center pl-4">IP</label>
+                  <input type="text" id="Ip" name="Ip" placeholder="IP" className="border-2 p-3 rounded-r-full form-control" required />
                 </div>
-                <div className="form-group col-md-6">
-                  <label htmlFor="Username">Username:</label>
-                  <input type="text" className="form-control" id="Username" name="Username" required />
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="Username" className="w-60 border-2 flex justify-between items-center pl-4">Username</label>
+                  <input id="Username" type="text" name="Username" placeholder="Username" className="border-2 p-3 rounded-r-full form-control" required />
                 </div>
-                <div className="form-group col-md-6">
-                  <label htmlFor="Password">Password:</label>
-                  <input type="password" className="form-control" id="Password" name="Password" required />
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="Password" className="w-60 border-2 flex justify-between items-center pl-4">Password:</label>
+                  <input type="password" className="border-2 p-3 rounded-r-full form-control" id="Password" name="Password" required />
                 </div>
 
-                {/* OS TEXT INPUT
-                  */}
-
-                <div class="form-group col-md-6">
-                  <label htmlFor="OS">OS:</label>
-                  <select class="form-control" id="OS" name="OS" required >
-                    <option value="" selected>Choose OS</option>
-                    {osOptions.map((option, index) => (
-                      <option key={index} value={option}>{option}</option>
-                    ))}
-                    {/* <option value="Test1">Test1</option>
-                    <option value="Test2">Test2</option> */}
-
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="OS" className="w-60 border-2 flex justify-between items-center pl-4">OS</label>
+                  <select list="OS" id="OS" name="OS" className="border-2 p-3 rounded-r-full form-control" placeholder="Open this select menu" required >
+                    <option selected>Open this select menu</option>
+                    <option value="Windows" >Windows</option>
+                    <option value="Mac" >Mac</option>
+                    <option value="Linux" >Linux</option>
                   </select>
                 </div>
 
-
-                {/* <div className="form-group">
-                  <label htmlFor="SysoId">SysoId:</label>
-                  <input type="text" className="form-control" id="SysoId" name="SysoId" required />
-                </div> */}
-
-                <div className="form-group col-md-6">
-                  <label htmlFor="Node_type">Node Type:</label>
-                  <input type="text" className="form-control" id="Node_type" name="Node_type" required />
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="NodeType" className="w-60 border-2 flex justify-between items-center pl-4">
+                    Node type
+                  </label>
+                  <select id="NodeType" list="NodeType" name="NodeType" className="border-2 p-3 rounded-r-full" placeholder="Open this select menu" required >
+                    <option selected>Open this select menu</option>
+                    <option value="dummy1" >dummy1</option>
+                    <option value="dummy2" >dummy2</option>
+                    <option value="dummy3" >dummy3</option>
+                  </select>
                 </div>
 
-                {/* FAKE IP  */}
-                {/* <div className="form-group">
-                  <label htmlFor="Fake_ip">Fake IP:</label>
-                  <input type="text" className="form-control" id="Fake_ip" name="Fake_ip" required />
-                </div> */}
-
-                <div className="form-group col-md-6">
-                  <label htmlFor="Operator">Operator:</label>
-
-                  <select class="form-control" id="Operator" name="Operator" required >
-
-                    <option value="" selected>Choose Operator</option>
-                    {operatorOptions.map((option, index) => (
-                      <option key={index} value={option}>{option}</option>
-                    ))}
-                    {/* <option value="Precall">Precall</option>
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="Operator" className="w-60 border-2 flex justify-between items-center pl-4">
+                    Operator
+                  </label>
+                  <select id="Operator" list="Operator" name="Operator" className="border-2 p-3 rounded-r-full" placeholder="Open this select menu" >
+                    <option selected>Open this select menu</option>
+                    <option value="Precall">Precall</option>
                     <option value="International">International</option>
                     <option value="Enterprise/DWH">Enterprise/DWH</option>
                     <option value="Vodafone">Vodafone</option>
                     <option value="Idea/WAP">Idea/WAP</option>
-                    <option value="Airtel">Airtel</option> */}
+                    <option value="Airtel">Airtel</option>
                   </select>
                 </div>
-
-                <div className="form-group col-md-6">
-                  <label htmlFor="HostName">Host Name:</label>
-                  <input type="text" className="form-control" id="HostName" name="HostName" required />
-                </div>
-
-                <div class="form-group col-md-6">
-                  <label htmlFor="Circle">Circle:</label>
-                  <select class="form-control" id="Circle" name="Circle" required >
-                    <option value="" selected>Choose Circle</option>
-
-                    {circleOptions.map((option, index) => (
-                      <option key={index} value={option}>{option}</option>
-                    ))}
-                    {/* <option value="Test1">Test1</option>
-                    <option value="Test2">Test2</option> */}
-
-                  </select>
-                </div>
-
-                {/* <div className="form-group">
-                  <label htmlFor="Circle">Circle:</label>
-                  <input type="text" className="form-control" id="Circle" name="Circle" required />
-                </div> */}
-
-                <div class="form-group col-md-6">
-                  <label htmlFor="Time_Sync">Time Sync:</label>
-                  <select class="form-control" id="Time_Sync" name="Time_Sync" required >
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="HostName" className="w-60 border-2 flex justify-between items-center pl-4">
+                    Host Name
+                  </label>
+                  <select id="HostName" list="HostName" name="HostName" className="border-2 p-3 rounded-r-full" placeholder="Open this select menu" required >
                     <option selected>Open this select menu</option>
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                  </select>
+                    <option value="dummy1" >dummy1</option>
+                    <option value="dummy2" >dummy2</option>
+                    <option value="dummy3" >dummy3</option></select>
                 </div>
-
-                {/* <div className="form-group">
-                  <label htmlFor="Time_Sync">Time Sync:</label>
-                  <input type="number" className="form-control" id="Time_Sync" name="Time_Sync" required />
-                </div> */}
-
-
-                <br></br>
-                <div>
-                  PORTS DETAILS
-                </div>
-                <br></br>
-
-
-                <div className="form-group col-md-6">
-                  <label htmlFor="RemotePort">Remote Port:</label>
-                  <input type="number" className="form-control" id="RemotePort" name="RemotePort" value={remotePort} onChange={(e) => setRemotePort(e.target.value)} required />
-                </div>
-                <div className="form-group col-md-6">
-                  <label htmlFor="LocalPort">Local Port:</label>
-                  <input type="number" className="form-control" id="LocalPort" name="LocalPort" value={localPort} onChange={(e) => setLocalPort(e.target.value)} required />
-                </div>
-                <div class="form-group col-md-6">
-                  <label htmlFor="Direction">Direction:</label>
-                  <select class="form-control" id="Direction" name="Direction" value={direction} onChange={(e) => setDirection(e.target.value)} required >
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="Circle" className="w-60 border-2 flex justify-between items-center pl-4">
+                    Circle
+                  </label>
+                  <select id="Circle" list="Circle" name="Circle" className="border-2 p-3 rounded-r-full" placeholder="Open this select menu" required >
                     <option selected>Open this select menu</option>
-                    <option value="Forward">Forward</option>
-                    <option value="Reverse">Reverse</option>
-
+                    <option value="Central">Central</option>
+                    <option value="North">North</option>
+                    <option value="East">East</option>
+                    <option value="South">South</option>
+                    <option value="West">West</option>
                   </select>
                 </div>
-                <div className="form-group col-md-6">
-                  <label htmlFor="SocketPath">Socket Path:</label>
-                  <input type="text" className="form-control" id="SocketPath" name="SocketPath" value={socketPath} onChange={(e) => setSocketPath(e.target.value)} required />
-                </div>
-                <div className="form-group col-md-6" >
-                  <label htmlFor="Status">Status:</label>
-                  <input type="text" className="form-control" id="Status" name="Status" value={portsStatus} onChange={(e) => setPortsStatus(e.target.value)} required />
-                </div>
-                <div className="form-group col-md-6">
-                  <label htmlFor="Comment">Comment:</label>
-                  <textarea className="form-control" id="Comment" name="Comment" rows="3" value={portsComment} onChange={(e) => setPortsComment(e.target.value)} required></textarea>
-                </div>
+                <div className="flex justify-between mt-4 form-group">
+                  <label htmlFor="TimeSync" className="w-60 border-2 flex justify-between items-center pl-4">
+                    Time Sync
+                  </label>
+                  <select id="TimeSync" list="TimeSync" name="TimeSync" className="border-2 p-3 rounded-r-full" placeholder="Open this select menu" >
+                    <option selected>Open this select menu</option>
 
+                    <option value="0" >0</option>
+                    <option value="1" >1</option>
+                  </select>
+                </div>
+              </main >
+              <section>
+                <p className="text-center mt-8 text-xl">Port details</p>
+                <div className="flex flex-col justify-center w-[28vw] m-auto">
 
+                  <div className="flex justify-between mt-4 form-group">
+                    <label htmlFor="RemotePort" className="w-60 border-2 flex justify-between items-center pl-4">Remote Port</label>
+                    <input type="number" id="RemotePort" name="RemotePort" value={remotePort} onChange={(e) => setRemotePort(e.target.value)} required className="border-2 p-3 rounded-r-full form-control" />
+                  </div>
 
+                  <div className="flex justify-between mt-4 form-group">
+                    <label htmlFor="LocalPort" className="w-60 border-2 flex justify-between items-center pl-4">Local Port</label>
+                    <input type="number" id="LocalPort" name="LocalPort" value={localPort} onChange={(e) => setLocalPort(e.target.value)} required className="border-2 p-3 rounded-r-full form-control" />
+                  </div>
 
-                <button type='submit' className="btn btn-primary">Submit</button>
+                  <div className="flex justify-between mt-4 form-group">
+                    <label htmlFor="Direction" className="w-60 border-2 flex justify-between items-center pl-4">Direction</label>
 
+                    <select id="Direction" name="Direction" value={direction} onChange={(e) => setDirection(e.target.value)} list="Direction" className="border-2 p-3 rounded-r-full form-control" placeholder="Open this select menu" required>
+                      <option selected>Open this select menu</option>
+                      <option value="Forward" >Forward</option>
+                      <option value="Reverse" >Reverse</option>
+                    </select>
+                  </div>
 
-                {/* DISCARDED NODE FORM INPUTS
+                  <div className="flex justify-between mt-4 form-group">
+                    <label htmlFor="SocketPath" className="w-60 border-2 flex justify-between items-center pl-4">Socket Path</label>
+                    <input type="text" id="SocketPath" name="SocketPath" value={socketPath} onChange={(e) => setSocketPath(e.target.value)} required className=" form-control border-2 p-3 rounded-r-full" />
+                  </div>
 
-                <div className="form-group">
-                  <label htmlFor="OS">OS:</label>
-                  <input type="text" className="form-control" id="OS" name="OS" required />
-                </div>                
-                <div className="form-group">
-                  <label htmlFor="Live">Live:</label>
-                  <input type="number" className="form-control" id="Live" name="Live" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="ParentId">Parent ID:</label>
-                  <input type="number" className="form-control" id="ParentId" name="ParentId" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="is_Intermediate">Is Intermediate:</label>
-                  <input type="number" className="form-control" id="is_Intermediate" name="is_Intermediate" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="is_Banned">Is Banned:</label>
-                  <input type="number" className="form-control" id="is_Banned" name="is_Banned" required />
-                </div> 
-                <div className="form-group">
-                  <label htmlFor="ServerName">Server Name:</label>
-                  <input type="text" className="form-control" id="ServerName" name="ServerName" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="Status">Status:</label>
-                  <input type="text" className="form-control" id="Status" name="Status" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="Comment">Comment:</label>
-                  <textarea className="form-control" id="Comment" name="Comment" rows="3" required></textarea>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="Cygwin_Version">Cygwin Version:</label>
-                  <input type="text" className="form-control" id="Cygwin_Version" name="Cygwin_Version" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="Transfer_Status">Transfer Status:</label>
-                  <textarea className="form-control" id="Transfer_Status" name="Transfer_Status" rows="3" required></textarea>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="Installation_Status">Installation Status:</label>
-                  <textarea className="form-control" id="Installation_Status" name="Installation_Status" rows="3" required></textarea>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="Key_Enabled">Key Enabled:</label>
-                  <input type="number" className="form-control" id="Key_Enabled" name="Key_Enabled" required />
-                </div>
-                
-                */}
+                  <div className="flex justify-between mt-4 form-group">
+                    <label htmlFor="Status" className="w-60 border-2 flex justify-between items-center pl-4">Status</label>
+                    <input type="text" id="Status" name="Status" value={portsStatus} onChange={(e) => setPortsStatus(e.target.value)} required className="border-2 p-3 rounded-r-full form-control" />
+                  </div>
 
-              </form>
-            </div>
-          </ >
+                  <div className="flex justify-between mt-4 form-group">
+                    <label htmlFor="Comment" className="w-60 border-2 flex justify-between items-center pl-4">Comment</label>
+                    <textarea className="form-control border-2 p-3 rounded-r-full" id="Comment" name="Comment" rows="3" value={portsComment} onChange={(e) => setPortsComment(e.target.value)} required />
+                  </div>
+
+                  <p className="text-center mt-4 text-red-500" id="failed">{errorMessage}</p>
+                  <p className="text-center mt-4 text-green-500" id="Success">{successMessage}</p>
+
+                  <div className="flex justify-center">
+                    <div className="flex justify-center bg-sky-600 w-28 rounded-full p-2 shadow-inner shadow-white border-2 border-sky-200 text-white cursor-pointer hover:bg-sky-800">
+                      <button type="submit" >Submit</button>
+                    </div>
+                  </div>
+
+                </div>
+              </section>
+            </form>
+            {/* <div className="h-16"></div> */}
+
+          </div >
         )
       }
     </>
